@@ -1,65 +1,106 @@
-"""
-client/network.py - TCP networking with newline-delimited JSON.
-Runs receive loop in daemon thread, puts packets into queue.Queue.
-"""
-
 import socket
 import threading
 import queue
-import time
-
-
 from shared.utils import serialize, deserialize
 
-
 class NetworkClient:
-    """Thread-safe TCP client. Receive loop -> queue. Main thread polls queue."""
+    """
+    /**
+     * Class NetworkClient
+     * 
+     * A non-blocking TCP socket manager. It spawns a daemon thread to quietly listen for incoming bytes from the server without freezing the Pygame graphics loop.
+     */
+    """
 
     def __init__(self):
+        """
+    /**
+     * Function __init__
+     * 
+     * Prepares the socket variable and the thread-safe deque which acts as an inbox for incoming parsed JSON packets.
+     * 
+     * parameters:
+     * - None
+     * 
+     * returns:
+     * - State modification or queried value based on execution.
+     */
+    """
         self._sock: socket.socket | None = None
         self._connected = False
         self._lock = threading.Lock()
         self._recv_thread: threading.Thread | None = None
         self.inbox: queue.Queue = queue.Queue()
-        self._buffer = b""
+        self._buffer = b''
 
-    # ── properties ────────────────────────────────────────────────
     @property
     def is_connected(self) -> bool:
+        """
+    /**
+     * Function is_connected
+     * 
+     * Checks if the underlying socket object exists and hasn't explicitly thrown a disconnection error yet.
+     * 
+     * parameters:
+     * - None
+     * 
+     * returns:
+     * - State modification or queried value based on execution.
+     */
+    """
         return self._connected
 
-    # ── connect / disconnect ──────────────────────────────────────
     def connect(self, ip: str, port: int) -> bool:
-        """Blocking connect. Returns True on success."""
+        """
+    /**
+     * Function connect
+     * 
+     * Tries to dial the server's IP and port. If it connects, it configures the socket to be non-blocking and launches the background listener thread.
+     * 
+     * parameters:
+     * - ip: Method argument required for execution.
+     * - port: Method argument required for execution.
+     * 
+     * returns:
+     * - State modification or queried value based on execution.
+     */
+    """
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
             sock.settimeout(5.0)
             sock.connect((ip, port))
             sock.settimeout(None)
-
             with self._lock:
                 self._sock = sock
                 self._connected = True
-                self._buffer = b""
-
-            # drain old queue
+                self._buffer = b''
             while not self.inbox.empty():
                 try:
                     self.inbox.get_nowait()
                 except queue.Empty:
                     break
-
-            self._recv_thread = threading.Thread(
-                target=self._receive_loop, daemon=True
-            )
+            self._recv_thread = threading.Thread(target=self._receive_loop, daemon=True)
             self._recv_thread.start()
             return True
         except (OSError, ConnectionRefusedError, TimeoutError) as exc:
-            print(f"[NET] connect failed: {exc}")
+            print(f'[NET] connect failed: {exc}')
             return False
 
     def disconnect(self):
+        """
+    /**
+     * Function disconnect
+     * 
+     * Gracefully shuts down the socket connection and cleans up the thread to prevent memory leaks when exiting the game.
+     * 
+     * parameters:
+     * - None
+     * 
+     * returns:
+     * - State modification or queried value based on execution.
+     */
+    """
         with self._lock:
             self._connected = False
             if self._sock:
@@ -73,9 +114,20 @@ class NetworkClient:
                     pass
                 self._sock = None
 
-    # ── send ──────────────────────────────────────────────────────
     def send_packet(self, packet: dict):
-        """Serialize + send. Thread-safe."""
+        """
+    /**
+     * Function send_packet
+     * 
+     * Converts a Python dictionary into a UTF-8 JSON string, appends a newline delimiter, and flushes it down the TCP socket to the server.
+     * 
+     * parameters:
+     * - packet: Method argument required for execution.
+     * 
+     * returns:
+     * - State modification or queried value based on execution.
+     */
+    """
         with self._lock:
             if not self._connected or not self._sock:
                 return
@@ -83,28 +135,36 @@ class NetworkClient:
                 data = serialize(packet)
                 self._sock.sendall(data)
             except OSError as exc:
-                print(f"[NET] send error: {exc}")
+                print(f'[NET] send error: {exc}')
                 self._connected = False
 
-    # ── receive loop (daemon thread) ──────────────────────────────
     def _receive_loop(self):
+        """
+    /**
+     * Function _receive_loop
+     * 
+     * The daemon thread's core logic. It reads chunks of bytes, buffers them until a newline is found, decodes the JSON, and appends it to the inbox queue.
+     * 
+     * parameters:
+     * - None
+     * 
+     * returns:
+     * - State modification or queried value based on execution.
+     */
+    """
         while True:
             with self._lock:
                 if not self._connected or not self._sock:
                     break
                 sock = self._sock
-
             try:
                 chunk = sock.recv(4096)
                 if not chunk:
-                    # server closed connection
-                    print("[NET] server closed connection")
+                    print('[NET] server closed connection')
                     break
-
                 self._buffer += chunk
-                # process newline-delimited messages
-                while b"\n" in self._buffer:
-                    line, self._buffer = self._buffer.split(b"\n", 1)
+                while b'\n' in self._buffer:
+                    line, self._buffer = self._buffer.split(b'\n', 1)
                     line = line.strip()
                     if not line:
                         continue
@@ -112,22 +172,30 @@ class NetworkClient:
                         packet = deserialize(line)
                         self.inbox.put(packet)
                     except Exception as exc:
-                        print(f"[NET] deserialize error: {exc} | raw={line[:120]}")
-
+                        print(f'[NET] deserialize error: {exc} | raw={line[:120]}')
             except OSError:
                 break
             except Exception as exc:
-                print(f"[NET] recv error: {exc}")
+                print(f'[NET] recv error: {exc}')
                 break
-
         with self._lock:
             self._connected = False
-        # push a disconnect sentinel so main loop knows
-        self.inbox.put({"type": "__DISCONNECTED__"})
+        self.inbox.put({'type': '__DISCONNECTED__'})
 
-    # ── helpers ───────────────────────────────────────────────────
     def poll_packets(self) -> list[dict]:
-        """Drain inbox. Call once per frame from main thread."""
+        """
+    /**
+     * Function poll_packets
+     * 
+     * Yields all the packets currently waiting in the thread-safe inbox and empties it, allowing the main Pygame thread to process them sequentially.
+     * 
+     * parameters:
+     * - None
+     * 
+     * returns:
+     * - State modification or queried value based on execution.
+     */
+    """
         packets = []
         while True:
             try:

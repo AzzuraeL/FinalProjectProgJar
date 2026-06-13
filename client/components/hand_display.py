@@ -1,16 +1,32 @@
-"""
-client/components/hand_display.py - Row of cards (player or opponent).
-"""
-
 import pygame
 from client.components.card_sprite import CardSprite
 from client.config import CARD_WIDTH, CARD_SPACING, SCREEN_WIDTH
 
-
 class HandDisplay:
-    """Renders a horizontal row of cards, centered. Handles selection for player hand."""
+    """
+    /**
+     * Class HandDisplay
+     * 
+     * A smart layout container that manages the player's collection of CardSprites. It fans them out horizontally and handles overlapping click logic.
+     */
+    """
 
-    def __init__(self, face_up: bool = True, clickable: bool = True, rotation: int = 0):
+    def __init__(self, face_up: bool=True, clickable: bool=True, rotation: int=0):
+        """
+    /**
+     * Function __init__
+     * 
+     * Sets up an empty array to track the CardSprite objects that belong in the player's bottom-of-screen hand.
+     * 
+     * parameters:
+     * - face_up: Method argument required for execution.
+     * - clickable: Method argument required for execution.
+     * - rotation: Method argument required for execution.
+     * 
+     * returns:
+     * - State modification or queried value based on execution.
+     */
+    """
         self.face_up = face_up
         self.clickable = clickable
         self.rotation = rotation
@@ -18,9 +34,20 @@ class HandDisplay:
         self.center_x = SCREEN_WIDTH // 2
         self.y = 0
 
-    # ── update cards ──────────────────────────────────────────────
     def set_cards(self, card_types: list[str]):
-        """Rebuild sprites from card type list."""
+        """
+    /**
+     * Function set_cards
+     * 
+     * Destroys the old sprites and creates brand new CardSprite objects based on the raw JSON list of cards received from the server state.
+     * 
+     * parameters:
+     * - card_types: Method argument required for execution.
+     * 
+     * returns:
+     * - State modification or queried value based on execution.
+     */
+    """
         self.cards = []
         for ct in card_types:
             sprite = CardSprite(card_type=ct, face_up=self.face_up, rotation=self.rotation)
@@ -28,19 +55,58 @@ class HandDisplay:
         self._layout()
 
     def set_facedown(self, count: int):
-        """Set N face-down cards (opponent)."""
+        """
+    /**
+     * Function set_facedown
+     * 
+     * Forces all cards in the hand to obscure their faces. Often used when the player dies and their hand becomes inactive.
+     * 
+     * parameters:
+     * - count: Method argument required for execution.
+     * 
+     * returns:
+     * - State modification or queried value based on execution.
+     */
+    """
         self.cards = []
         for _ in range(count):
-            sprite = CardSprite(card_type="", face_up=False, rotation=self.rotation)
+            sprite = CardSprite(card_type='', face_up=False, rotation=self.rotation)
             self.cards.append(sprite)
         self._layout()
 
     def set_position(self, center_x: int, y: int):
+        """
+    /**
+     * Function set_position
+     * 
+     * Defines the bounding box where the hand should be drawn, allowing the layout algorithm to center the cards within this zone.
+     * 
+     * parameters:
+     * - center_x: Method argument required for execution.
+     * - y: Method argument required for execution.
+     * 
+     * returns:
+     * - State modification or queried value based on execution.
+     */
+    """
         self.center_x = center_x
         self.y = y
         self._layout()
 
     def _layout(self):
+        """
+    /**
+     * Function _layout
+     * 
+     * The math-heavy function that calculates the horizontal offset for each card so they fan out neatly from the center, overlapping slightly if there are too many.
+     * 
+     * parameters:
+     * - None
+     * 
+     * returns:
+     * - State modification or queried value based on execution.
+     */
+    """
         n = len(self.cards)
         if n == 0:
             return
@@ -57,19 +123,41 @@ class HandDisplay:
             for i, card in enumerate(self.cards):
                 card.set_position(start_x + i * (CARD_WIDTH + CARD_SPACING), self.y)
 
-    # ── draw ──────────────────────────────────────────────────────
     def draw(self, surface: pygame.Surface):
+        """
+    /**
+     * Function draw
+     * 
+     * Iterates through the CardSprites from left to right, calling their individual draw methods so the rightmost cards layer on top of the leftmost ones.
+     * 
+     * parameters:
+     * - surface: Method argument required for execution.
+     * 
+     * returns:
+     * - State modification or queried value based on execution.
+     */
+    """
         for card in self.cards:
             card.draw(surface)
 
-    # ── interaction ───────────────────────────────────────────────
     def handle_click(self, event: pygame.event.Event) -> bool:
-        """Toggle selection on click. Returns True if a card was toggled."""
+        """
+    /**
+     * Function handle_click
+     * 
+     * Scans the cards in reverse (top-most visual layer first) to figure out exactly which card the user clicked, toggling its selection state.
+     * 
+     * parameters:
+     * - event: Method argument required for execution.
+     * 
+     * returns:
+     * - State modification or queried value based on execution.
+     */
+    """
         if not self.clickable or not self.face_up:
             return False
         if event.type != pygame.MOUSEBUTTONDOWN or event.button != 1:
             return False
-
         for card in self.cards:
             if card.contains_point(event.pos):
                 card.selected = not card.selected
@@ -77,11 +165,50 @@ class HandDisplay:
         return False
 
     def get_selected_indices(self) -> list[int]:
+        """
+    /**
+     * Function get_selected_indices
+     * 
+     * Iterates through the hand to find which cards have been clicked and raised, returning their array indexes to send to the server.
+     * 
+     * parameters:
+     * - None
+     * 
+     * returns:
+     * - State modification or queried value based on execution.
+     */
+    """
         return [i for i, c in enumerate(self.cards) if c.selected]
 
     def get_selected_cards(self) -> list[str]:
+        """
+    /**
+     * Function get_selected_cards
+     * 
+     * Returns the actual dictionary representations (suit, rank) of the currently selected cards, mostly for local validation before playing.
+     * 
+     * parameters:
+     * - None
+     * 
+     * returns:
+     * - State modification or queried value based on execution.
+     */
+    """
         return [c.card_type for c in self.cards if c.selected]
 
     def clear_selection(self):
+        """
+    /**
+     * Function clear_selection
+     * 
+     * Pushes all cards back down into their unselected default state, usually after a play has been confirmed or rejected.
+     * 
+     * parameters:
+     * - None
+     * 
+     * returns:
+     * - State modification or queried value based on execution.
+     */
+    """
         for c in self.cards:
             c.selected = False
