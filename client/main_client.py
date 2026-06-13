@@ -7,7 +7,7 @@ if _PROJECT_ROOT not in sys.path:
 from client.config import get_custom_font
 import pygame
 from shared.packet_types import C_CONNECT, C_RECONNECT, C_JOIN_LOBBY, C_LEAVE_LOBBY, C_PING, C_CREATE_ROOM, C_JOIN_ROOM, C_LEAVE_ROOM, C_START_ROOM_GAME, S_WELCOME, S_ERROR, S_LOBBY_JOINED, S_MATCH_FOUND, S_GAME_STATE_UPDATE, S_REVEAL_CARDS, S_ROULETTE_START, S_ROULETTE_RESULT, S_GAME_OVER, S_PONG, S_CHAT_MSG, S_ROUND_RESET, S_YOUR_TURN, S_PLAY_ACCEPTED, S_PLAY_REJECTED, S_ROOM_CREATED, S_ROOM_JOINED, S_ROOM_ERROR, S_ROOM_UPDATE, S_ROOM_PLAYER_JOINED, S_ROOM_PLAYER_LEFT, S_RECONNECT_OK, S_RECONNECT_FAIL
-from shared.constants import PHASE_GAME_OVER, PHASE_ROULETTE
+from shared.constants import PHASE_GAME_OVER, PHASE_ROULETTE, PHASE_PLAYING
 from client.config import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, COLOR_BG
 from client.network import NetworkClient
 from client.game_state import GameState
@@ -68,6 +68,7 @@ class LiarsDeckClient:
         self._error_msg = ''
         self._error_timer = 0.0
         self._error_font: pygame.font.Font | None = None
+        self._reconnect_grace_until = 0.0
 
     def run(self):
         """
@@ -161,7 +162,7 @@ class LiarsDeckClient:
                     elif action == 'disconnect':
                         self.net.disconnect()
                         self.gs.reset()
-                        clear_session()
+                        clear_session(self.gs.username)
                         self.state = STATE_LOGIN
                         self.login_screen = LoginScreen()
         elif self.state == STATE_LOBBY:
@@ -187,7 +188,7 @@ class LiarsDeckClient:
                         self.state = STATE_MENU
                     elif action.get('type') == 'CLIENT_MAIN_MENU':
                         self.net.disconnect()
-                        clear_session()
+                        clear_session(self.gs.username)
                         self.state = STATE_LOGIN
                         self.login_screen = LoginScreen()
                     else:
@@ -217,7 +218,7 @@ class LiarsDeckClient:
                 elif action == 'menu':
                     self.net.disconnect()
                     self.gs.reset()
-                    clear_session()
+                    clear_session(self.gs.username)
                     self.state = STATE_LOGIN
                     self.login_screen = LoginScreen()
 
@@ -268,7 +269,7 @@ class LiarsDeckClient:
         ok = self.net.connect(ip, port)
         if not ok:
             self.login_screen.error_msg = f'Reconnect failed: cannot reach {ip}:{port}'
-            clear_session()
+            clear_session(session_data.get('username', self.gs.username))
             return
         self.gs.username = session_data['username']
         self.gs.player_id = session_data['player_id']
@@ -316,6 +317,13 @@ class LiarsDeckClient:
      */
     """
         if ptype == '__DISCONNECTED__':
+            grace_active = time.time() < self._reconnect_grace_until
+            still_connected = self.net.is_connected
+            print(f'[DISCONNECTED] grace_active={grace_active} still_connected={still_connected} state={self.state}')
+            if grace_active:
+                return
+            if still_connected:
+                return
             self._show_error('Disconnected from server')
             self.state = STATE_LOGIN
             self.login_screen = LoginScreen()
@@ -334,13 +342,20 @@ class LiarsDeckClient:
         elif ptype == S_RECONNECT_OK:
             self.gs.player_id = pkt.get('player_id', self.gs.player_id)
             self.gs.username = pkt.get('username', self.gs.username)
-            # Reconnect successful — go to menu, game state will arrive if in-game
+            # Reconnect successful — open a grace window to swallow any stale
+            # __DISCONNECTED__ packets from the old broken TCP link. The follow-up
+            # S_GAME_STATE_UPDATE will transition us into the game if still active.
+            self._reconnect_grace_until = time.time() + 3.0
+            save_session(self.gs.player_id, self.gs.session_token, self.gs.username,
+                         getattr(self, '_last_ip', '127.0.0.1'),
+                         getattr(self, '_last_port', 12345))
             self.menu_screen = MenuScreen(self.gs.username, self.ping)
             self.state = STATE_MENU
+            print(f'[RECONNECT] OK state={self.state} phase={self.gs.game_phase!r} pid={self.gs.player_id}')
         elif ptype == S_RECONNECT_FAIL:
             reason = pkt.get('reason', 'Session expired')
             self._show_error(f'Reconnect failed: {reason}')
-            clear_session()
+            clear_session(self.gs.username)
             self.net.disconnect()
             self.gs.reset()
             self.state = STATE_LOGIN
@@ -359,8 +374,20 @@ class LiarsDeckClient:
             self.state = STATE_GAME
         elif ptype == S_GAME_STATE_UPDATE:
             self.gs.update_from_server(pkt.get('state', pkt))
+            # Reconnect safety net: if the engine is in PHASE_ROULETTE but the
+            # server's state packet did not carry roulette_state, synthesize a
+            # minimal one so the overlay + PULL button still render.
+            if self.gs.game_phase == PHASE_ROULETTE and not self.gs.roulette_state:
+                self.gs.roulette_state = {
+                    'target_player_id': self.gs.current_turn_player_id,
+                    'pull_number': 1,
+                    'chamber_count': 6,
+                    'survived': None,
+                }
             # If state update arrives while in MENU (reconnect to active game), enter game
-            if self.state == STATE_MENU and self.gs.game_phase not in (None, '', PHASE_GAME_OVER):
+            should_enter = self.state == STATE_MENU and self.gs.game_phase in (PHASE_PLAYING, PHASE_ROULETTE)
+            print(f'[STATE_UPDATE] state={self.state} phase={self.gs.game_phase!r} should_enter_game={should_enter}')
+            if should_enter:
                 self.game_screen = GameScreen(self.gs, self.ping)
                 self.state = STATE_GAME
             if self.gs.game_phase == PHASE_GAME_OVER and self.state == STATE_GAME:

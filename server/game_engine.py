@@ -390,8 +390,10 @@ class GameEngine:
             state = {'game_phase': self.phase, 'round_number': self.round_number, 'table_card': self.table_card, 'current_turn_player_id': self.current_turn_id, 'sequence': self.sequence, 'your_hand': list(ps.hand), 'your_pull_count': ps.pull_count, 'your_alive': ps.is_alive, 'center_pile_count': len(self.discard_pile), 'players': [{'id': p.player_id, 'username': p.username, 'alive': p.is_alive, 'pull_count': p.pull_count, 'hand_count': len(p.hand), 'hand': list(p.hand) if not ps.is_alive else None, 'connected': p.is_connected} for p in self.players.values()], 'deck_remaining': len(self.deck)}
             if self.last_play:
                 state['last_play'] = {'player_id': self.last_play['player_id'], 'claimed_type': self.last_play['claimed_type'], 'count': self.last_play['count']}
-            if self.phase == PHASE_ROULETTE and self._roulette_loser_id:
-                state['roulette_state'] = {'target_player_id': self._roulette_loser_id, 'pull_number': self.players[self._roulette_loser_id].pull_count + 1, 'chamber_count': ROULETTE_CHAMBERS}
+            if self.phase == PHASE_ROULETTE:
+                target = self._roulette_loser_id
+                pull_number = (self.players[target].pull_count + 1) if target and target in self.players else 1
+                state['roulette_state'] = {'target_player_id': target, 'pull_number': pull_number, 'chamber_count': ROULETTE_CHAMBERS, 'survived': None}
             return state
 
     def get_winner(self) -> str | None:

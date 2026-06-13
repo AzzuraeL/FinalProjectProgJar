@@ -283,7 +283,7 @@ class ClientHandler(threading.Thread):
         self.player_id = generate_id()
         self.username = username
         self.session_token = generate_session_token()
-        session = {'player_id': self.player_id, 'username': self.username, 'session_token': self.session_token, 'socket': self.sock, 'addr': self.addr, 'handler': self, 'connected': True, 'room_id': None}
+        session = {'player_id': self.player_id, 'username': self.username, 'session_token': self.session_token, 'socket': self.sock, 'addr': self.addr, 'handler': self, '_current_handler': self, 'connected': True, 'room_id': None}
         with self.sessions_lock:
             self.sessions[self.player_id] = session
         self.logger.log_connect(self.player_id, self.username, self.addr)
@@ -293,12 +293,12 @@ class ClientHandler(threading.Thread):
         """
     /**
      * Function _handle_reconnect
-     * 
+     *
      * Allows a player whose TCP connection dropped to re-attach to their existing session using their secure session token, preventing match abandonment.
-     * 
+     *
      * parameters:
      * - packet: Method argument required for execution.
-     * 
+     *
      * returns:
      * - State modification or queried value based on execution.
      */
@@ -313,19 +313,50 @@ class ClientHandler(threading.Thread):
         self.player_id = pid
         self.username = session['username']
         self.session_token = token
+        old_handler = None
         with self.sessions_lock:
+            old_handler = session.get('handler')
+            if old_handler is self:
+                old_handler = None
             session['socket'] = self.sock
             session['handler'] = self
             session['connected'] = True
+            session['_current_handler'] = self
+        if old_handler is not None:
+            try:
+                old_handler._running = False
+            except Exception:
+                pass
+            try:
+                old_sock = old_handler.sock
+                if old_sock is not None:
+                    try:
+                        old_sock.shutdown(socket.SHUT_RDWR)
+                    except OSError:
+                        pass
+                    try:
+                        old_sock.close()
+                    except OSError:
+                        pass
+            except Exception:
+                pass
+        # Update the handler reference inside room.players so that broadcast_room,
+        # send_to_opponent, and send_game_state route packets through the new socket.
+        room = self.rooms.get_room_by_player(self.player_id)
+        if room and self.player_id in room.players:
+            room.players[self.player_id]['handler'] = self
         self.logger.log_info('RECONN   player=%s user=%s', self.player_id, self.username)
         self.send_packet({'type': S_RECONNECT_OK, 'player_id': self.player_id, 'username': self.username})
-        room = self.rooms.get_room_by_player(self.player_id)
         if room:
             room.game_engine.set_player_connected(self.player_id, True)
             self.room_id = room.room_id
             state = room.game_engine.build_state_for_player(self.player_id)
+            self.logger.log_info('RECONN_STATE room=%s phase=%s turn=%s sent_to=%s',
+                                 room.room_id, state.get('game_phase'), state.get('current_turn_player_id'), self.player_id)
             self.send_packet({'type': S_GAME_STATE_UPDATE, 'state': state})
             self.send_to_opponent({'type': S_OPPONENT_RECONNECTED, 'player_id': self.player_id})
+        else:
+            self.logger.log_info('RECONN_NO_ROOM player=%s', self.player_id)
 
     def _handle_join_lobby(self, packet: dict):
         """
@@ -756,6 +787,7 @@ class ClientHandler(threading.Thread):
                 if h:
                     h.send_packet({'type': S_ERROR, 'message': 'Server full'})
             return
+        room.status = 'IN_GAME'
         with self.sessions_lock:
             for p in player_list:
                 pid = p['player_id']
@@ -780,17 +812,25 @@ class ClientHandler(threading.Thread):
         """
     /**
      * Function _handle_disconnect
-     * 
+     *
      * Called when the socket breaks or the client sends an exit. It pauses their presence in the GameEngine and gives them a timeout window to reconnect.
-     * 
+     *
      * parameters:
      * - None
-     * 
+     *
      * returns:
      * - State modification or queried value based on execution.
      */
     """
+        is_superseded = False
         if self.player_id:
+            with self.sessions_lock:
+                sess = self.sessions.get(self.player_id)
+                if sess:
+                    current = sess.get('_current_handler') or sess.get('handler')
+                    if current is not None and current is not self:
+                        is_superseded = True
+        if self.player_id and not is_superseded:
             self.logger.log_disconnect(self.player_id, 'connection_lost')
             self.rate_limiter.remove_player(self.player_id)
             self.lobby.remove_from_queue(self.player_id)
@@ -826,12 +866,12 @@ class ClientHandler(threading.Thread):
                     """
     /**
      * Function reconnect_timeout
-     * 
+     *
      * A background thread that counts down after a disconnect. If the timer hits zero, it formally forfeits the player from the active match.
-     * 
+     *
      * parameters:
      * - None
-     * 
+     *
      * returns:
      * - State modification or queried value based on execution.
      */

@@ -16,12 +16,12 @@ class NetworkClient:
         """
     /**
      * Function __init__
-     * 
+     *
      * Prepares the socket variable and the thread-safe deque which acts as an inbox for incoming parsed JSON packets.
-     * 
+     *
      * parameters:
      * - None
-     * 
+     *
      * returns:
      * - State modification or queried value based on execution.
      */
@@ -32,6 +32,7 @@ class NetworkClient:
         self._recv_thread: threading.Thread | None = None
         self.inbox: queue.Queue = queue.Queue()
         self._buffer = b''
+        self._generation = 0
 
     @property
     def is_connected(self) -> bool:
@@ -80,7 +81,9 @@ class NetworkClient:
                     self.inbox.get_nowait()
                 except queue.Empty:
                     break
-            self._recv_thread = threading.Thread(target=self._receive_loop, daemon=True)
+            self._generation += 1
+            this_gen = self._generation
+            self._recv_thread = threading.Thread(target=self._receive_loop, args=(this_gen,), daemon=True)
             self._recv_thread.start()
             return True
         except (OSError, ConnectionRefusedError, TimeoutError) as exc:
@@ -91,17 +94,18 @@ class NetworkClient:
         """
     /**
      * Function disconnect
-     * 
+     *
      * Gracefully shuts down the socket connection and cleans up the thread to prevent memory leaks when exiting the game.
-     * 
+     *
      * parameters:
      * - None
-     * 
+     *
      * returns:
      * - State modification or queried value based on execution.
      */
     """
         with self._lock:
+            self._generation += 1
             self._connected = False
             if self._sock:
                 try:
@@ -138,16 +142,16 @@ class NetworkClient:
                 print(f'[NET] send error: {exc}')
                 self._connected = False
 
-    def _receive_loop(self):
+    def _receive_loop(self, gen: int):
         """
     /**
      * Function _receive_loop
-     * 
+     *
      * The daemon thread's core logic. It reads chunks of bytes, buffers them until a newline is found, decodes the JSON, and appends it to the inbox queue.
-     * 
+     *
      * parameters:
-     * - None
-     * 
+     * - gen: The generation id of this connection, used to detect stale threads.
+     *
      * returns:
      * - State modification or queried value based on execution.
      */
@@ -162,6 +166,9 @@ class NetworkClient:
                 if not chunk:
                     print('[NET] server closed connection')
                     break
+                with self._lock:
+                    if self._generation != gen:
+                        break
                 self._buffer += chunk
                 while b'\n' in self._buffer:
                     line, self._buffer = self._buffer.split(b'\n', 1)
@@ -179,8 +186,11 @@ class NetworkClient:
                 print(f'[NET] recv error: {exc}')
                 break
         with self._lock:
-            self._connected = False
-        self.inbox.put({'type': '__DISCONNECTED__'})
+            still_current = self._generation == gen
+            if still_current:
+                self._connected = False
+        if still_current:
+            self.inbox.put({'type': '__DISCONNECTED__'})
 
     def poll_packets(self) -> list[dict]:
         """

@@ -168,13 +168,19 @@ class LoginScreen:
         field_w = 320
         field_h = 40
         self.input_username = _InputField(cx - field_w // 2, 290, field_w, field_h, 'Username', '', 16)
-        self.input_ip = _InputField(cx - field_w // 2, 370, field_w, field_h, 'Server IP', '127.0.0.1', 45)
+        self.input_ip = _InputField(cx - field_w // 2, 370, field_w, field_h, 'Server IP', '0.tcp.ap.ngrok.io', 45)
         self.input_port = _InputField(cx - field_w // 2, 450, field_w, field_h, 'Port', '12345', 5)
         self.fields = [self.input_username, self.input_ip, self.input_port]
         self.btn_connect = Button(cx - BUTTON_WIDTH // 2, 530, BUTTON_WIDTH, BUTTON_HEIGHT, 'CONNECT')
         self.error_msg: str = ''
-        # Reconnect support
+        # Reconnect support — load the most-recent saved session for the preview
+        # and, if present, pre-fill the login fields so RECONNECT acts on the
+        # correct (per-username) session file.
         self._saved_session = load_session()
+        if self._saved_session:
+            self.input_username.text = self._saved_session.get('username', '')
+            self.input_ip.text = str(self._saved_session.get('ip', self.input_ip.text))
+            self.input_port.text = str(self._saved_session.get('port', self.input_port.text))
         self.btn_reconnect = Button(cx - BUTTON_WIDTH // 2, 600, BUTTON_WIDTH, BUTTON_HEIGHT, 'RECONNECT', border_color=COLOR_ORANGE)
         self._reconn_font: pygame.font.Font | None = None
         self._title_font: pygame.font.Font | None = None
@@ -334,27 +340,32 @@ class LoginScreen:
         """
     /**
      * Function _try_reconnect
-     * 
+     *
      * Attempts to use saved session credentials to reconnect to the server without re-entering login details.
-     * 
+     *
      * parameters:
      * - None
-     * 
+     *
      * returns:
      * - State modification or queried value based on execution.
      */
     """
-        if not self._saved_session:
-            self.error_msg = 'No saved session'
+        username = self.input_username.text.strip()
+        if not username:
+            self.error_msg = 'Enter your username, then click RECONNECT'
+            return None
+        session = load_session(username)
+        if not session:
+            self.error_msg = f'No saved session for {username}'
             return None
         self.error_msg = ''
         return {
             'reconnect': True,
-            'player_id': self._saved_session['player_id'],
-            'session_token': self._saved_session['session_token'],
-            'username': self._saved_session['username'],
-            'ip': self._saved_session['ip'],
-            'port': self._saved_session['port']
+            'player_id': session['player_id'],
+            'session_token': session['session_token'],
+            'username': session['username'],
+            'ip': session['ip'],
+            'port': session['port']
         }
 
     def _draw_bg_video(self, surface: pygame.Surface):
@@ -428,13 +439,14 @@ class LoginScreen:
         uname = self.input_username.text.strip()
         self.btn_connect.enabled = len(uname) > 0
         self.btn_connect.draw(surface)
-        # Reconnect button and info
-        if self._saved_session:
+        # Reconnect button and info — always reflect the currently-typed username
+        # so the user can see which session RECONNECT will use.
+        active_session = load_session(uname) if uname else self._saved_session
+        if active_session:
             self.btn_reconnect.draw(surface)
             if self._reconn_font is None:
                 self._reconn_font = get_custom_font(FONT_SIZE_TINY)
-            sess = self._saved_session
-            info_text = f"Previous session: {sess['username']} @ {sess['ip']}:{sess['port']}"
+            info_text = f"Previous session: {active_session['username']} @ {active_session['ip']}:{active_session['port']}"
             info_surf = self._reconn_font.render(info_text, True, COLOR_ORANGE)
             surface.blit(info_surf, info_surf.get_rect(centerx=cx, y=652))
         if self.error_msg:

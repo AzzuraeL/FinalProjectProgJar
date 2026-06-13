@@ -113,6 +113,7 @@ class LiarsDeckServer:
                 if h:
                     h.send_packet({'type': S_ERROR, 'message': 'Server full'})
             return
+        room.status = 'IN_GAME'
         with self.sessions_lock:
             for p in player_list:
                 pid = p['player_id']
