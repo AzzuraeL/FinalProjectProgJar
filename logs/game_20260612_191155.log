@@ -1,0 +1,15 @@
+[2026-06-12 19:11:55] INFO     ==================================================
+[2026-06-12 19:11:55] INFO     Liar's Deck Server started on 0.0.0.0:12345
+[2026-06-12 19:11:55] INFO     ==================================================
+[2026-06-12 19:12:20] INFO     ACCEPT   addr=127.0.0.1:63856
+[2026-06-12 19:12:20] INFO     CONNECT  player=c321221902b9 user=l addr=127.0.0.1:63856
+[2026-06-12 19:12:20] INFO     LOBBY    player=c321221902b9 joined queue
+[2026-06-12 19:12:24] INFO     ACCEPT   addr=127.0.0.1:63857
+[2026-06-12 19:12:24] INFO     CONNECT  player=b30a69842dee user=r addr=127.0.0.1:63857
+[2026-06-12 19:12:24] INFO     LOBBY    player=b30a69842dee joined queue
+[2026-06-12 19:12:34] INFO     MATCH    room=eb620e9844ca players=['c321221902b9', 'b30a69842dee'] (2 players)
+[2026-06-12 19:12:34] INFO     DISCONN  player=c321221902b9 reason=connection_lost
+[2026-06-12 19:12:34] INFO     DISCONN  player=b30a69842dee reason=connection_lost
+[2026-06-12 19:13:34] INFO     GAMEOVER room=eb620e9844ca winner=b30a69842dee loser=c321221902b9
+[2026-06-12 19:16:50] INFO     Server shutting down...
+[2026-06-12 19:16:50] INFO     Server stopped.

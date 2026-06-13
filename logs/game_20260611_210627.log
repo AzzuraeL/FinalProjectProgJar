@@ -1,0 +1,41 @@
+[2026-06-11 21:06:27] INFO     ==================================================
+[2026-06-11 21:06:27] INFO     Liar's Deck Server started on 0.0.0.0:12345
+[2026-06-11 21:06:27] INFO     ==================================================
+[2026-06-11 21:07:16] INFO     ACCEPT   addr=127.0.0.1:58570
+[2026-06-11 21:07:16] INFO     CONNECT  player=fef88fa72f30 user=VERY addr=127.0.0.1:58570
+[2026-06-11 21:07:16] INFO     LOBBY    player=fef88fa72f30 joined queue
+[2026-06-11 21:07:31] INFO     ACCEPT   addr=127.0.0.1:63806
+[2026-06-11 21:07:31] INFO     CONNECT  player=784df1eec511 user=RAFIF addr=127.0.0.1:63806
+[2026-06-11 21:07:31] INFO     LOBBY    player=784df1eec511 joined queue
+[2026-06-11 21:07:31] INFO     MATCH    room=c4e9609a75c5 p1=fef88fa72f30 p2=784df1eec511
+[2026-06-11 21:07:51] INFO     PLAY     room=c4e9609a75c5 player=fef88fa72f30 cards=['KING'] claimed=QUEEN
+[2026-06-11 21:08:05] INFO     LIAR     room=c4e9609a75c5 caller=784df1eec511 target=fef88fa72f30
+[2026-06-11 21:08:05] INFO     REVEAL   room=c4e9609a75c5 cards=['KING'] lying=True
+[2026-06-11 21:08:09] WARNING  INVALID  player=fef88fa72f30 reason=Not your turn to pull the trigger raw={"type":"ROULETTE_PULL"}
+[2026-06-11 21:08:13] WARNING  INVALID  player=fef88fa72f30 reason=Not your turn to pull the trigger raw={"type":"ROULETTE_PULL"}
+[2026-06-11 21:08:21] WARNING  INVALID  player=fef88fa72f30 reason=Not your turn to pull the trigger raw={"type":"ROULETTE_PULL"}
+[2026-06-11 21:08:22] WARNING  INVALID  player=fef88fa72f30 reason=Not your turn to pull the trigger raw={"type":"ROULETTE_PULL"}
+[2026-06-11 21:08:23] WARNING  INVALID  player=fef88fa72f30 reason=Not your turn to pull the trigger raw={"type":"ROULETTE_PULL"}
+[2026-06-11 21:08:23] INFO     DISCONN  player=fef88fa72f30 reason=connection_lost
+[2026-06-11 21:08:37] INFO     DISCONN  player=784df1eec511 reason=connection_lost
+[2026-06-11 21:09:08] INFO     ACCEPT   addr=127.0.0.1:61724
+[2026-06-11 21:09:08] INFO     CONNECT  player=5fa538d3f125 user=VERRY addr=127.0.0.1:61724
+[2026-06-11 21:09:08] INFO     LOBBY    player=5fa538d3f125 joined queue
+[2026-06-11 21:09:14] INFO     ACCEPT   addr=127.0.0.1:61731
+[2026-06-11 21:09:14] INFO     CONNECT  player=a32f392c452f user=RAFIF addr=127.0.0.1:61731
+[2026-06-11 21:09:14] INFO     LOBBY    player=a32f392c452f joined queue
+[2026-06-11 21:09:14] INFO     MATCH    room=4a101348c150 p1=5fa538d3f125 p2=a32f392c452f
+[2026-06-11 21:09:20] INFO     PLAY     room=4a101348c150 player=5fa538d3f125 cards=['KING'] claimed=KING
+[2026-06-11 21:09:23] INFO     GAMEOVER room=c4e9609a75c5 winner=784df1eec511 loser=fef88fa72f30
+[2026-06-11 21:09:24] INFO     LIAR     room=4a101348c150 caller=a32f392c452f target=5fa538d3f125
+[2026-06-11 21:09:24] INFO     REVEAL   room=4a101348c150 cards=['KING'] lying=False
+[2026-06-11 21:09:25] INFO     ROULET   room=4a101348c150 player=a32f392c452f result=SURVIVED pull=1
+[2026-06-11 21:09:48] INFO     PLAY     room=4a101348c150 player=a32f392c452f cards=['QUEEN'] claimed=KING
+[2026-06-11 21:09:52] INFO     LIAR     room=4a101348c150 caller=5fa538d3f125 target=a32f392c452f
+[2026-06-11 21:09:52] INFO     REVEAL   room=4a101348c150 cards=['QUEEN'] lying=True
+[2026-06-11 21:09:55] WARNING  INVALID  player=a32f392c452f reason=Not your turn to pull the trigger raw={"type":"ROULETTE_PULL"}
+[2026-06-11 21:10:05] INFO     DISCONN  player=a32f392c452f reason=connection_lost
+[2026-06-11 21:10:08] INFO     DISCONN  player=5fa538d3f125 reason=connection_lost
+[2026-06-11 21:11:05] INFO     GAMEOVER room=4a101348c150 winner=5fa538d3f125 loser=a32f392c452f
+[2026-06-11 21:13:39] INFO     Server shutting down...
+[2026-06-11 21:13:39] INFO     Server stopped.

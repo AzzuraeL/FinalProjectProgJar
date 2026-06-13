@@ -1,0 +1,26 @@
+[2026-06-12 19:08:01] INFO     ==================================================
+[2026-06-12 19:08:01] INFO     Liar's Deck Server started on 0.0.0.0:12345
+[2026-06-12 19:08:01] INFO     ==================================================
+[2026-06-12 19:08:25] INFO     ACCEPT   addr=127.0.0.1:62106
+[2026-06-12 19:08:25] INFO     CONNECT  player=8dd6c1b3c30a user=aku addr=127.0.0.1:62106
+[2026-06-12 19:08:25] INFO     LOBBY    player=8dd6c1b3c30a joined queue
+[2026-06-12 19:08:29] INFO     ACCEPT   addr=127.0.0.1:62110
+[2026-06-12 19:08:29] INFO     CONNECT  player=e918cb96550e user=saya addr=127.0.0.1:62110
+[2026-06-12 19:08:29] INFO     LOBBY    player=e918cb96550e joined queue
+[2026-06-12 19:08:39] INFO     MATCH    room=bc5f46ca9689 players=['8dd6c1b3c30a', 'e918cb96550e'] (2 players)
+[2026-06-12 19:09:15] INFO     PLAY     room=bc5f46ca9689 player=e918cb96550e cards=['QUEEN'] claimed=QUEEN
+[2026-06-12 19:09:24] INFO     LIAR     room=bc5f46ca9689 caller=8dd6c1b3c30a target=e918cb96550e
+[2026-06-12 19:09:24] INFO     REVEAL   room=bc5f46ca9689 player=e918cb96550e cards=['QUEEN'] lying=False
+[2026-06-12 19:09:25] INFO     ROULET   room=bc5f46ca9689 player=8dd6c1b3c30a result=SURVIVED pull=1
+[2026-06-12 19:09:32] INFO     PLAY     room=bc5f46ca9689 player=8dd6c1b3c30a cards=['KING', 'JOKER'] claimed=KING
+[2026-06-12 19:09:35] INFO     LIAR     room=bc5f46ca9689 caller=e918cb96550e target=8dd6c1b3c30a
+[2026-06-12 19:09:35] INFO     REVEAL   room=bc5f46ca9689 player=8dd6c1b3c30a cards=['KING', 'JOKER'] lying=False
+[2026-06-12 19:09:36] INFO     ROULET   room=bc5f46ca9689 player=e918cb96550e result=SURVIVED pull=1
+[2026-06-12 19:09:41] INFO     PLAY     room=bc5f46ca9689 player=e918cb96550e cards=['QUEEN'] claimed=ACE
+[2026-06-12 19:09:43] INFO     LIAR     room=bc5f46ca9689 caller=8dd6c1b3c30a target=e918cb96550e
+[2026-06-12 19:09:43] INFO     REVEAL   room=bc5f46ca9689 player=e918cb96550e cards=['QUEEN'] lying=True
+[2026-06-12 19:09:45] INFO     ROULET   room=bc5f46ca9689 player=e918cb96550e result=SURVIVED pull=2
+[2026-06-12 19:09:58] INFO     DISCONN  player=8dd6c1b3c30a reason=connection_lost
+[2026-06-12 19:09:59] INFO     DISCONN  player=e918cb96550e reason=connection_lost
+[2026-06-12 19:10:01] INFO     Server shutting down...
+[2026-06-12 19:10:01] INFO     Server stopped.

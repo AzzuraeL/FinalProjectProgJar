@@ -1,0 +1,57 @@
+[2026-06-12 14:14:51] INFO     ==================================================
+[2026-06-12 14:14:51] INFO     Liar's Deck Server started on 0.0.0.0:12345
+[2026-06-12 14:14:51] INFO     ==================================================
+[2026-06-12 14:17:49] INFO     ACCEPT   addr=192.168.1.33:52131
+[2026-06-12 14:17:49] INFO     CONNECT  player=23772522bd7a user=rafi addr=192.168.1.33:52131
+[2026-06-12 14:17:49] INFO     LOBBY    player=23772522bd7a joined queue
+[2026-06-12 14:18:04] INFO     ACCEPT   addr=127.0.0.1:61555
+[2026-06-12 14:18:04] INFO     CONNECT  player=83cf37b1dfa4 user=VERY addr=127.0.0.1:61555
+[2026-06-12 14:18:04] INFO     LOBBY    player=83cf37b1dfa4 joined queue
+[2026-06-12 14:18:14] INFO     MATCH    room=6645af69d7f5 players=['23772522bd7a', '83cf37b1dfa4'] (2 players)
+[2026-06-12 14:18:21] INFO     PLAY     room=6645af69d7f5 player=83cf37b1dfa4 cards=['KING', 'KING'] claimed=QUEEN
+[2026-06-12 14:18:26] INFO     LIAR     room=6645af69d7f5 caller=23772522bd7a target=83cf37b1dfa4
+[2026-06-12 14:18:26] INFO     REVEAL   room=6645af69d7f5 player=83cf37b1dfa4 cards=['KING', 'KING'] lying=True
+[2026-06-12 14:18:28] INFO     ROULET   room=6645af69d7f5 player=83cf37b1dfa4 result=SURVIVED pull=1
+[2026-06-12 14:18:32] INFO     PLAY     room=6645af69d7f5 player=83cf37b1dfa4 cards=['QUEEN', 'JOKER'] claimed=QUEEN
+[2026-06-12 14:18:41] INFO     PLAY     room=6645af69d7f5 player=23772522bd7a cards=['QUEEN'] claimed=QUEEN
+[2026-06-12 14:18:52] INFO     LIAR     room=6645af69d7f5 caller=83cf37b1dfa4 target=23772522bd7a
+[2026-06-12 14:18:52] INFO     REVEAL   room=6645af69d7f5 player=23772522bd7a cards=['QUEEN'] lying=False
+[2026-06-12 14:18:53] WARNING  INVALID  player=23772522bd7a reason=Cannot play cards in phase ROULETTE raw={"type":"PLAY_CARDS","card_indices":[0],"claimed_type":"QUEEN"}
+[2026-06-12 14:18:53] WARNING  INVALID  player=23772522bd7a reason=Cannot play cards in phase ROULETTE raw={"type":"PLAY_CARDS","card_indices":[0],"claimed_type":"QUEEN"}
+[2026-06-12 14:18:54] INFO     ROULET   room=6645af69d7f5 player=83cf37b1dfa4 result=SURVIVED pull=2
+[2026-06-12 14:19:00] INFO     PLAY     room=6645af69d7f5 player=83cf37b1dfa4 cards=['KING'] claimed=QUEEN
+[2026-06-12 14:19:03] INFO     LIAR     room=6645af69d7f5 caller=23772522bd7a target=83cf37b1dfa4
+[2026-06-12 14:19:03] INFO     REVEAL   room=6645af69d7f5 player=83cf37b1dfa4 cards=['KING'] lying=True
+[2026-06-12 14:19:05] INFO     ROULET   room=6645af69d7f5 player=83cf37b1dfa4 result=DEAD pull=3
+[2026-06-12 14:19:05] INFO     GAMEOVER room=6645af69d7f5 winner=23772522bd7a loser=83cf37b1dfa4
+[2026-06-12 14:19:24] INFO     DISCONN  player=83cf37b1dfa4 reason=connection_lost
+[2026-06-12 14:19:26] INFO     LOBBY    player=23772522bd7a left queue
+[2026-06-12 14:19:26] INFO     DISCONN  player=23772522bd7a reason=connection_lost
+[2026-06-12 14:20:39] INFO     ACCEPT   addr=192.168.1.33:23514
+[2026-06-12 14:20:39] INFO     CONNECT  player=f5872f4a5ebb user=halo addr=192.168.1.33:23514
+[2026-06-12 14:20:39] INFO     LOBBY    player=f5872f4a5ebb joined queue
+[2026-06-12 14:20:41] INFO     LOBBY    player=f5872f4a5ebb left queue
+[2026-06-12 14:20:41] INFO     DISCONN  player=f5872f4a5ebb reason=connection_lost
+[2026-06-12 14:22:50] INFO     ACCEPT   addr=127.0.0.1:55061
+[2026-06-12 14:22:50] INFO     CONNECT  player=05ea97c63ac7 user=halo addr=127.0.0.1:55061
+[2026-06-12 14:22:50] INFO     LOBBY    player=05ea97c63ac7 joined queue
+[2026-06-12 14:22:58] INFO     ACCEPT   addr=127.0.0.1:55062
+[2026-06-12 14:22:58] INFO     CONNECT  player=83891d620172 user=q addr=127.0.0.1:55062
+[2026-06-12 14:22:58] INFO     LOBBY    player=83891d620172 joined queue
+[2026-06-12 14:23:09] INFO     MATCH    room=ccd8f882fefa players=['05ea97c63ac7', '83891d620172'] (2 players)
+[2026-06-12 14:23:20] INFO     PLAY     room=ccd8f882fefa player=05ea97c63ac7 cards=['KING', 'KING', 'KING'] claimed=KING
+[2026-06-12 14:23:32] INFO     LIAR     room=ccd8f882fefa caller=83891d620172 target=05ea97c63ac7
+[2026-06-12 14:23:32] INFO     REVEAL   room=ccd8f882fefa player=05ea97c63ac7 cards=['KING', 'KING', 'KING'] lying=False
+[2026-06-12 14:23:33] INFO     ROULET   room=ccd8f882fefa player=83891d620172 result=SURVIVED pull=1
+[2026-06-12 14:23:43] INFO     PLAY     room=ccd8f882fefa player=83891d620172 cards=['QUEEN', 'QUEEN', 'ACE'] claimed=KING
+[2026-06-12 14:23:47] INFO     LIAR     room=ccd8f882fefa caller=05ea97c63ac7 target=83891d620172
+[2026-06-12 14:23:47] INFO     REVEAL   room=ccd8f882fefa player=83891d620172 cards=['QUEEN', 'QUEEN', 'ACE'] lying=True
+[2026-06-12 14:23:50] INFO     ROULET   room=ccd8f882fefa player=83891d620172 result=SURVIVED pull=2
+[2026-06-12 14:23:52] INFO     PLAY     room=ccd8f882fefa player=83891d620172 cards=['QUEEN'] claimed=KING
+[2026-06-12 14:23:57] INFO     PLAY     room=ccd8f882fefa player=05ea97c63ac7 cards=['ACE', 'QUEEN'] claimed=KING
+[2026-06-12 14:24:01] INFO     LIAR     room=ccd8f882fefa caller=83891d620172 target=05ea97c63ac7
+[2026-06-12 14:24:01] INFO     REVEAL   room=ccd8f882fefa player=05ea97c63ac7 cards=['ACE', 'QUEEN'] lying=True
+[2026-06-12 14:24:28] INFO     ROULET   room=ccd8f882fefa player=05ea97c63ac7 result=SURVIVED pull=1
+[2026-06-12 14:24:56] INFO     DISCONN  player=83891d620172 reason=connection_lost
+[2026-06-12 14:25:45] INFO     Server shutting down...
+[2026-06-12 14:25:45] INFO     Server stopped.
