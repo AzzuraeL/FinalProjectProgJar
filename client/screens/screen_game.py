@@ -1,4 +1,4 @@
-from client.config import get_custom_font
+from client.config import get_custom_font, resource_path
 import pygame
 import time
 import os
@@ -59,7 +59,10 @@ class GameScreen:
         self._reveal_active: bool = False
         self._last_hand: list[str] = []
         try:
-            self.table_img = pygame.image.load(os.path.join('client', 'assets', 'images', 'table.png')).convert_alpha()
+            table_path = resource_path(os.path.join('client', 'assets', 'images', 'table.png'))
+            if not os.path.exists(table_path):
+                table_path = resource_path(os.path.join('assets', 'images', 'table.png'))
+            self.table_img = pygame.image.load(table_path).convert_alpha()
             self.table_img = pygame.transform.smoothscale(self.table_img, (SCREEN_WIDTH - 80, SCREEN_HEIGHT - 60))
         except Exception:
             self.table_img = None

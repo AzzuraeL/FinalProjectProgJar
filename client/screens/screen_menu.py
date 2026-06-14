@@ -1,4 +1,4 @@
-from client.config import get_custom_font
+from client.config import get_custom_font, resource_path
 import pygame
 import math
 import time
@@ -191,9 +191,9 @@ class MenuScreen:
      * - State modification or queried value based on execution.
      */
     """
-        path = os.path.join('client', 'assets', 'images', 'Title.png')
+        path = resource_path(os.path.join('client', 'assets', 'images', 'Title.png'))
         if not os.path.exists(path):
-            path = os.path.join('assets', 'images', 'Title.png')
+            path = resource_path(os.path.join('assets', 'images', 'Title.png'))
         try:
             self._title_img = pygame.image.load(path).convert_alpha()
         except Exception:

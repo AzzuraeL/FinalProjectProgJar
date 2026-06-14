@@ -1,4 +1,4 @@
-from client.config import get_custom_font
+from client.config import get_custom_font, resource_path
 import os
 import pygame
 from client.config import CARD_WIDTH, CARD_HEIGHT, CARD_RADIUS, CARD_SELECT_OFFSET, COLOR_CARD_FACE, COLOR_CARD_BACK, COLOR_CARD_BACK_PATTERN, COLOR_CARD_BORDER, COLOR_CARD_SELECTED, COLOR_HEART, COLOR_SPADE, COLOR_JOKER, COLOR_GOLD
@@ -45,7 +45,7 @@ def get_card_image(card_type: str) -> pygame.Surface | None:
     card_type = card_type.upper()
     if card_type not in _image_cache:
         try:
-            paths = [os.path.join('client', 'assets', 'images', f'{card_type.lower()}.webp'), os.path.join('assets', 'images', f'{card_type.lower()}.webp')]
+            paths = [resource_path(os.path.join('client', 'assets', 'images', f'{card_type.lower()}.webp')), resource_path(os.path.join('assets', 'images', f'{card_type.lower()}.webp'))]
             img_path = None
             for p in paths:
                 if os.path.exists(p):
@@ -79,7 +79,7 @@ def get_card_back_image() -> pygame.Surface | None:
     card_type = 'CARDBACK'
     if card_type not in _image_cache:
         try:
-            paths = [os.path.join('client', 'assets', 'images', 'CardBack.webp'), os.path.join('assets', 'images', 'CardBack.webp')]
+            paths = [resource_path(os.path.join('client', 'assets', 'images', 'CardBack.webp')), resource_path(os.path.join('assets', 'images', 'CardBack.webp'))]
             img_path = None
             for p in paths:
                 if os.path.exists(p):

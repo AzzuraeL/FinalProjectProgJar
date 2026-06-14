@@ -1,4 +1,4 @@
-from client.config import get_custom_font
+from client.config import get_custom_font, resource_path
 import pygame
 import math
 import time
@@ -187,9 +187,9 @@ class LoginScreen:
         self._sub_font: pygame.font.Font | None = None
         self._err_font: pygame.font.Font | None = None
         self._start_time = time.time()
-        self.video_path = os.path.join('client', 'assets', 'scene', 'YTDown_YouTube_Honkai-Star-Rail-Main-Menu-Animation_Media_a1dmueMsE3M_001_1080p.mp4')
+        self.video_path = resource_path(os.path.join('client', 'assets', 'scene', 'YTDown_YouTube_Honkai-Star-Rail-Main-Menu-Animation_Media_a1dmueMsE3M_001_1080p.mp4'))
         if not os.path.exists(self.video_path):
-            self.video_path = os.path.join('assets', 'scene', 'YTDown_YouTube_Honkai-Star-Rail-Main-Menu-Animation_Media_a1dmueMsE3M_001_1080p.mp4')
+            self.video_path = resource_path(os.path.join('assets', 'scene', 'YTDown_YouTube_Honkai-Star-Rail-Main-Menu-Animation_Media_a1dmueMsE3M_001_1080p.mp4'))
         self.cap = None
         if cv2 is not None:
             self.cap = cv2.VideoCapture(self.video_path)
@@ -210,9 +210,9 @@ class LoginScreen:
      * - State modification or queried value based on execution.
      */
     """
-        path = os.path.join('client', 'assets', 'images', 'Title.png')
+        path = resource_path(os.path.join('client', 'assets', 'images', 'Title.png'))
         if not os.path.exists(path):
-            path = os.path.join('assets', 'images', 'Title.png')
+            path = resource_path(os.path.join('assets', 'images', 'Title.png'))
         try:
             self._title_img = pygame.image.load(path).convert_alpha()
         except Exception:

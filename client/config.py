@@ -63,6 +63,18 @@ PING_GOOD = 80
 PING_WARN = 150
 import pygame
 import os
+import sys
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
 _custom_fonts = {}
 
 def get_custom_font(size: int) -> pygame.font.Font:
@@ -82,9 +94,9 @@ def get_custom_font(size: int) -> pygame.font.Font:
     if size not in _custom_fonts:
         if not pygame.font.get_init():
             pygame.font.init()
-        font_path = os.path.join('client', 'assets', 'fonts', 'Genshin-Impact-Font', 'zh-cn.ttf')
+        font_path = resource_path(os.path.join('client', 'assets', 'fonts', 'Genshin-Impact-Font', 'zh-cn.ttf'))
         if not os.path.exists(font_path):
-            font_path = os.path.join('assets', 'fonts', 'Genshin-Impact-Font', 'zh-cn.ttf')
+            font_path = resource_path(os.path.join('assets', 'fonts', 'Genshin-Impact-Font', 'zh-cn.ttf'))
         try:
             _custom_fonts[size] = pygame.font.Font(font_path, size)
         except Exception:

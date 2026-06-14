@@ -1,5 +1,5 @@
 import os
-from client.config import get_custom_font
+from client.config import get_custom_font, resource_path
 import pygame
 from client.config import COLOR_BTN_NORMAL, COLOR_BTN_HOVER, COLOR_BTN_DISABLED, COLOR_BTN_TEXT, COLOR_BTN_TEXT_DISABLED, COLOR_GOLD, BUTTON_RADIUS, FONT_SIZE_MEDIUM
 _btn_images = {}
@@ -28,9 +28,9 @@ def get_button_image(state: str, size: tuple[int, int]) -> pygame.Surface | None
             filename = 'ButtonHover_Liar.png'
         elif state == 'disabled':
             filename = 'ButtonDisable.png'
-        path = os.path.join('client', 'assets', 'images', filename)
+        path = resource_path(os.path.join('client', 'assets', 'images', filename))
         if not os.path.exists(path):
-            path = os.path.join('assets', 'images', filename)
+            path = resource_path(os.path.join('assets', 'images', filename))
         try:
             img = pygame.image.load(path).convert_alpha()
             new_w = size[0]
